@@ -12,6 +12,7 @@ def shift_filtration(rips,n):
         f.append(d.Simplex(temp,s.data))
     return f
 
+
 def complex_union(f,g):
     #"Takes two filtrations and builds their union simplicial complex."
     union = d.Filtration()
@@ -52,7 +53,6 @@ def build_zigzag_times(rips,n,numbins):
 def compute_zigzag(f,times):
     zz, dgms, cells = d.zigzag_homology_persistence(f, times)
     return dgms
-
 
 
 

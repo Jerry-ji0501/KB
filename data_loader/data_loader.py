@@ -3,27 +3,23 @@ import numpy as np
 
 #zpi load distancematrix->zpi
 #gcn load 构建好的特征数据
-path = os.getcwd()
+paths = os.getcwd()
 
-def load_DistanceMatrix(paths):
+def load_DistanceMatrix(paths,GraphNum = 27,SampNum = 180):
     #DistanceMatrix is used in ZPI compution   SampleNum*GraphNum*NVertices*NVertices
     BrainGraphs = []
+    edgeAucGraphs = []
     dir_list = os.listdir(paths + '/distancematrix')
-    for i in range (len(dir_list)):
-        path = os.path.join(paths+'/distancematrix'+dir_list[i])
-        edgelist = np.loadtxt(path,delimiter=',')
-        BrainGraphs.append(edgelist)
-        if (i%27) == 0:
-
-
-
-
-    for cur_file in dir_list:
-        path = os.path.join(paths + '/distancematrix', cur_file)
-
-        edgelist = np.loadtxt(path, delimiter=',')
-        BrainGraphs.append(edgelist)
-    return BrainGraphs
+    for i in range (SampNum):
+        for j in range (GraphNum):
+            path = os.path.join(paths+'/distancematrix'+dir_list[(i-1)*27+j])
+            edgelist = np.loadtxt(path,delimiter=',')
+            edgeAucGraphs.append(edgelist)
+            edgeAuc = np.stack(edgeAucGraphs,axis=0)
+        BrainGraphs.append(edgeAucGraphs)
+        BrainTopoData = np.stack(BrainGraphs,axis=0)
+    print(BrainTopoData.shape)
+    return BrainTopoData #SampNum*GraphNum*NVertices*NVertices
 
 
 def load_feature():
@@ -32,7 +28,8 @@ def load_feature():
 
 
 
-
+def load_zpi():
+    #用于加载计算保存的zpi特征
 
 
 

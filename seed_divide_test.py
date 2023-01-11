@@ -30,7 +30,7 @@ def adjacent_matrix(file):
     for numpy_array in numpy_list:
         # 分割数组
         devide_list = []
-        print()
+        print(numpy_array.shape)
         for m in range(int(list(numpy_array.shape)[1] / 2000)):
             devide_list.append(2000 * (m + 1))
         part = np.hsplit(numpy_array, devide_list)
