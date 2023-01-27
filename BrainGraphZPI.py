@@ -30,9 +30,9 @@ channels = 62
 
 path = os.getcwd()
 NVertices = 62 #128
-scaleParameter = 1.0
+scaleParameter = 1
 maxDimHoles = 2
-Timesnap = 27
+Timesnap = 3
 
 #BrainGraph networks Zigzag Persistence Diagrams
  # Load the BrainGraph Adj.
