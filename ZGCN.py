@@ -11,10 +11,9 @@ class TLSGCN(nn.Module):
         super(TLSGCN,self).__init__()
         self.link_len = link_len
         self.weights_pool = nn.Parameter(torch.FloatTensor(emb_dim,link_len,dim_in,int(dim_out/2)))
-        print(self.weights_pool)
         self.weights_window = nn.Parameter(torch.FloatTensor(emb_dim,dim_in,int(dim_out/2)))  #int(dim_in/2)
         self.bias_pool = nn.Parameter(torch.FloatTensor(emb_dim,dim_out))
-        self.T = nn.Parameter(torch.FloatTensor(9))#window_len
+        self.T = nn.Parameter(torch.FloatTensor(window_len))#window_len
         self.cnn = CNN(int(dim_out/2))
 
     def forward(self,x,x_window,node_embeddings,zigzag_PI):
@@ -32,7 +31,6 @@ class TLSGCN(nn.Module):
         #print(node_embeddings.shape)
         #print(self.weights_pool.shape)
         #print(torch.max(node_embeddings))
-        print(self.weights_pool)
         #assert torch.isnan(node_embeddings).sum() == 0
         #assert torch.isnan(self.weights_pool).sum() == 0
 
@@ -47,8 +45,6 @@ class TLSGCN(nn.Module):
         #print(x_g)
         x_g = x_g.permute(0, 2, 1, 3) #B, N, link_len, dim_in
         #print(torch.max(x_g))
-        print(x_g.shape)
-        print(weights.shape)
 
         #print(torch.max(weights))
 
@@ -80,7 +76,6 @@ class TLSGCN(nn.Module):
 
         #combination operation
         x_gwconv = torch.cat([x_tgconv, x_twconv], dim = -1) + bias #B, N, dim_out
-        print(x_gwconv)
         return x_gwconv
 
 
