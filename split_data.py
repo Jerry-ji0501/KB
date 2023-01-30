@@ -7,7 +7,8 @@ import re
 
 def ad_p(file):  # 计算皮尔逊相关系数
     # 使用scipy.io转换matlab数据为numpy(成功)
-    data = sio.loadmat(path + '/Preprocessed_EEG/' + file)
+    (filename, extension) = os.path.splitext(file)
+    data = sio.loadmat(path + 'data/Preprocessed_EEG/' + file)
     numpy_list = []
     film_list = []  # record the key of dic
     key_list = list(data.keys())
@@ -28,8 +29,8 @@ def ad_p(file):  # 计算皮尔逊相关系数
         # 分割数组
         decide_list = []
 
-        for m in range(int(list(numpy_array.shape)[1] / 2000)):
-            decide_list.append(2000 * (m + 1))
+        for m in range(int(list(numpy_array.shape)[1] / 6000)):
+            decide_list.append(6000 * (m + 1))
         part = np.hsplit(numpy_array, decide_list)
 
         length = len(part)
@@ -42,24 +43,29 @@ def ad_p(file):  # 计算皮尔逊相关系数
             result = []
             for i in range(62):
                 for j in range(62):
-                    if matrix[i][j] < 0.7 and i < j:  # 筛选阈值设置为0.1
+                    if matrix[i][j] < 0.3 and i < j:  # 筛选阈值设置为0.1
                         result.append([int(i + 1), int(j + 1), matrix[i][j]])
 
             # 写入csv文件
             for name in film_list:
-                paths = 'ad_pm0.7/' + name
+                path1 = 'data/adjacent_matrix/pm0.3/' + filename
+                path2 = 'data/adjacent_matrix/pm0.3/' + filename + '/' + name
                 df = pd.DataFrame(result)
-                if os.path.isdir(paths):
+                if os.path.isdir(path1):
                     pass
                 else:
-                    os.mkdir(paths)
-                csv_save_path = 'ad_pm0.7/{}/part{}.csv'.format(name, n)
+                    os.mkdir(path1)
+                if os.path.isdir(path2):
+                    pass
+                else:
+                    os.mkdir(path2)
+                csv_save_path = 'data/adjacent_matrix/pm0.3/{}/{}/part{}.csv'.format(filename, name, n)
                 df.to_csv(csv_save_path, sep=',', index=False, header=False)
 
 
 path = os.getcwd()
 # list all dir
-dir_list = os.listdir(path + '/Preprocessed_EEG')
+dir_list = os.listdir(path + '/data/Preprocessed_EEG')
 
 # deal with film [1,4,6,9] and compute the adj
 for doc in dir_list:
