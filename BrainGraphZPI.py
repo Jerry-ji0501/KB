@@ -143,12 +143,12 @@ def main():
     # Global variable
     BrainGraphs = []
     Time_snap = 3
-    File_location = '/data/adjacent_matrix/pm0.2/1_20131107/djc_eeg9'
-    ZPI_location = 'ZPI/pm0.2/1_20131107/djc_eeg9/'
+    File_location = '/data/adjacent_matrix/pm0.15/1_20131027/djc_eeg9'
+    ZPI_location = 'ZPI/pm0.15/1_20131027/djc_eeg9/'
     NVertices = 62
     scaleParameter = 1
     maxDimHoles = 2
-    index = 4
+    index = 0
 
     start = time.time()
     # Load data
