@@ -1,40 +1,27 @@
-import os
+import scipy.io
 import numpy as np
-import scipy.io as sio
+import scipy.io
 import pandas as pd
-import re
+import os
 
 
-def ad_p(file):  # 计算皮尔逊相关系数
+def adjacent_matrix(file):
     # 使用scipy.io转换matlab数据为numpy(成功)
-    data = sio.loadmat(path + '/Preprocessed_EEG/' + file)
-    numpy_list = []
-    film_list = []  # record the key of dic
-    key_list = list(data.keys())
+    (filename, extension) = os.path.splitext(file)
+    matlab_data = scipy.io.loadmat('data/Preprocessed_EEG/' + file)
+    key_list_all = list(matlab_data.keys())
+
+    key_list = [key_list_all[3], key_list_all[6], key_list_all[8], key_list_all[11]]
 
     for key in key_list:
-        film_num = re.findall(r'\d+', key)
-        if len(film_num) == 0:
-            continue
-        else:
-            ls = [1, 4, 6, 9]
-            num = int(film_num[0])
-
-            if num in ls:
-                film_list.append(key)
-                numpy_list.append(data[key])
-
-    for numpy_array in numpy_list:
-        # 分割数组
-        decide_list = []
-
-        for m in range(int(list(numpy_array.shape)[1] / 2000)):
-            decide_list.append(2000 * (m + 1))
-        part = np.hsplit(numpy_array, decide_list)
+        numpy_array = matlab_data[key]
+        divide_list = []
+        for m in range(int(list(numpy_array.shape)[1] / 6000)):
+            divide_list.append(6000 * (m + 1))
+        part = np.hsplit(numpy_array, divide_list)
 
         length = len(part)
         for n in range(length):
-
             # 计算协方差矩阵
             matrix = np.corrcoef(part[n])
 
@@ -42,25 +29,32 @@ def ad_p(file):  # 计算皮尔逊相关系数
             result = []
             for i in range(62):
                 for j in range(62):
-                    if matrix[i][j] < 0.7 and i < j:  # 筛选阈值设置为0.1
+                    if 0 < matrix[i][j] < 0.1 and i < j:  # 筛选阈值设置为0.1
                         result.append([int(i + 1), int(j + 1), matrix[i][j]])
 
             # 写入csv文件
-            for name in film_list:
-                paths = 'ad_pm0.7/' + name
-                df = pd.DataFrame(result)
-                if os.path.isdir(paths):
-                    pass
-                else:
-                    os.mkdir(paths)
-                csv_save_path = 'ad_pm0.7/{}/part{}.csv'.format(name, n)
-                df.to_csv(csv_save_path, sep=',', index=False, header=False)
+            path1 = 'data/adjacent_matrix/pm0.1/' + filename
+            path2 = 'data/adjacent_matrix/pm0.1/' + filename + '/' + key
+            df = pd.DataFrame(result)
+            if os.path.isdir(path1):
+                pass
+            else:
+                os.mkdir(path1)
+
+            if os.path.isdir(path2):
+                pass
+            else:
+                os.mkdir(path2)
+
+            csv_save_path = 'data/adjacent_matrix/pm0.1/{}/{}/part{}.csv'.format(filename, key, n)
+            df.to_csv(csv_save_path, sep=',', index=False, header=False)
 
 
-path = os.getcwd()
-# list all dir
-dir_list = os.listdir(path + '/Preprocessed_EEG')
+if __name__ == '__main__':
+    path = os.getcwd()
+    # list all dir
+    dir_list = os.listdir(path + '/data/Preprocessed_EEG')
 
-# deal with film [1,4,6,9] and compute the adj
-for doc in dir_list:
-    ad_p(doc)
+    # 依次处理1469
+    for doc in dir_list:
+        adjacent_matrix(doc)
