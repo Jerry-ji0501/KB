@@ -6,6 +6,7 @@ import torch
 #个人来看更倾向于(3)
 #para:inputdata:batch_size*graph_num*Node_Num*Node_Num
 #output:batch_size*window_Num*graphNums*Node_Num*Node_Num
+
 def Add_Windows(data,window_len=3,stride=1):
     length = data.shape[1]
     end_index = length-window_len+stride

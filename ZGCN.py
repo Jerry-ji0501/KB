@@ -16,8 +16,11 @@ class TLSGCN(nn.Module):
         self.T = nn.Parameter(torch.FloatTensor(window_len))#window_len
         self.cnn = CNN(int(dim_out/2))
 
+
     def forward(self,x,x_window,node_embeddings,zigzag_PI):
-        node_num = node_embeddings.shape[0]
+        node_num = node_embeddings.shape[1]
+        node_embeddings = node_embeddings[0]
+
         supports = F.softmax(F.relu(torch.mm(node_embeddings,node_embeddings.transpose(0,1))),dim=1)
 
         support_set =  [torch.eye(node_num), supports]
@@ -42,11 +45,13 @@ class TLSGCN(nn.Module):
         bias = torch.matmul(node_embeddings, self.bias_pool) #N, dim_out
 
         x_g = torch.einsum("knm,bmc->bknc", supports, x) #B, link_len, N, dim_in
-        #print(x_g)
+        print(x_g.shape)
         x_g = x_g.permute(0, 2, 1, 3) #B, N, link_len, dim_in
         #print(torch.max(x_g))
+        print(x_g.shape)
 
         #print(torch.max(weights))
+        print(weights.shape)
 
         x_gconv = torch.einsum('bnki,nkio->bno', x_g, weights) #B, N, dim_out/2(4,62,2,62),(62,2,10,31)
         #print(x_gconv)
