@@ -1,4 +1,4 @@
-'''
+"""
       This py doc is aim to achieve  the Graph Transformer Encoder Part of our SYN module.
       The function of GraphTransformerEncoder take the embedding of KnowledgeGraph as input :
           KG_Node_Feature: (Node_Num,Embed_dim)
@@ -14,7 +14,7 @@
           we can get a global encoder  hidden state of graph .
       Output of GraphTransformereEncoder:
           Graph_Contextual_vector:  Embeded with Graph Contextual Information
-'''
+"""
 
 import torch
 import torch.nn as nn
@@ -40,9 +40,11 @@ KG_embed_vector+in_degree_embedding+out_degree_embedding->Graph_representation_v
 
 
 '''
+
+
 class GraphTransformerEncoder(nn.Module):
     def __init__(self,
-                 dropout_rate:float,
+                 dropout_rate: float,
                  KG_num,
                  embed_dim,
                  num_in_degree,
@@ -51,9 +53,8 @@ class GraphTransformerEncoder(nn.Module):
                  hidden_size,
                  ffn_size,
                  num_layer
-                ):
+                 ):
         super(GraphTransformerEncoder, self).__init__()
-
 
         self.dropout = nn.Dropout(dropout_rate)
         self.LayerNorm = nn.LayerNorm(embed_dim)
@@ -66,7 +67,7 @@ class GraphTransformerEncoder(nn.Module):
         self.encoder_layers = nn.ModuleList(encoders)
 
     def forward(self, KG_embed_vector, in_degree, out_degree):
-        #node_features = self.node_encoder(KG_embed_vector)
+        # node_features = self.node_encoder(KG_embed_vector)
         node_features = (
                 KG_embed_vector + self.in_degree_encoder(in_degree) + self.out_degree_encoder(out_degree)
         )
@@ -80,45 +81,42 @@ class GraphTransformerEncoder(nn.Module):
 
 
 class EncoderLayer(nn.Module):
-    def __init__(self,embed_dim,num_heads,hidden_size,ffn_size,num_indegree,num_outdegree):
+    def __init__(self, embed_dim, num_heads, hidden_size, ffn_size, num_indegree, num_outdegree):
         super(EncoderLayer, self).__init__()
 
+        # Graph Information Embedding
+        self.in_degree = nn.Embedding(num_indegree, hidden_size, padding_idx=0)
+        self.out_degree = nn.Embedding(num_outdegree, hidden_size, padding_idx=0)
 
-        #Graph Information Embedding
-        self.in_degree = nn.Embedding(num_indegree,hidden_size,padding_idx=0)
-        self.out_degree = nn.Embedding(num_outdegree,hidden_size,padding_idx=0)
-
-
-        self.selfattention = nn.MultiheadAttention(embed_dim=embed_dim,num_heads=num_heads)
-        self.LayerNorm =  nn.LayerNorm(embed_dim)
-        self.layers1 = nn.Linear(embed_dim,ffn_size)
+        self.selfattention = nn.MultiheadAttention(embed_dim=embed_dim, num_heads=num_heads)
+        self.LayerNorm = nn.LayerNorm(embed_dim)
+        self.layers1 = nn.Linear(embed_dim, ffn_size)
         self.gelu = nn.GELU()
-        self.layers2 = nn.Linear(ffn_size,embed_dim)
+        self.layers2 = nn.Linear(ffn_size, embed_dim)
         self.dropout = nn.Dropout(0.1)
 
-
-    def  FeedForwardNetwork(self,x):
+    def FeedForwardNetwork(self, x):
         x = self.layers1(x)
         x = self.gelu(x)
         x = self.layers2(x)
         return x
 
-    def forward(self,x:torch.Tensor):
+    def forward(self, x: torch.Tensor):
         '''
 
         :param x:
         :return:x,attn
         Build it upon the Transformer Architecture
         '''
-        #Multi-Attention
+        # Multi-Attention
         residual = x
         x_norm = self.LayerNorm(x)
-        x, attn= self.selfattention(query=x_norm,key=x_norm,value=x_norm)
+        x, attn = self.selfattention(query=x_norm, key=x_norm, value=x_norm)
         x = self.dropout(x)
         x = x + residual
-        #print(x.shape)
+        # print(x.shape)
 
-        #FeedForward Network
+        # FeedForward Network
         residual = x
         x = self.LayerNorm(x)
         x = self.FeedForwardNetwork(x)
@@ -127,9 +125,8 @@ class EncoderLayer(nn.Module):
         return x
 
 
-
 class GraphNodeFeatures(nn.Module):
-    def __init__(self,KG_num,
+    def __init__(self, KG_num,
                  embed_dim,
                  num_in_degree,
                  num_out_degree,
@@ -144,20 +141,17 @@ class GraphNodeFeatures(nn.Module):
 
         self.Dropout = nn.Dropout(0.1)
         self.LayerNorm = nn.LayerNorm(embed_dim)
-        self.node_encoder = nn.Embedding(KG_num,embed_dim,padding_idx=0)
-        self.in_degree_encoder = nn.Embedding(num_in_degree,embed_dim,padding_idx=0)
-        self.out_degree_encoder = nn.Embedding(num_out_degree,embed_dim,padding_idx=0)
-        encoders = [EncoderLayer(embed_dim,num_heads,hidden_size,ffn_size,num_indegree,num_outdegree)
-                   for _ in range(num_layer) ]
+        self.node_encoder = nn.Embedding(KG_num, embed_dim, padding_idx=0)
+        self.in_degree_encoder = nn.Embedding(num_in_degree, embed_dim, padding_idx=0)
+        self.out_degree_encoder = nn.Embedding(num_out_degree, embed_dim, padding_idx=0)
+        encoders = [EncoderLayer(embed_dim, num_heads, hidden_size, ffn_size, num_indegree, num_outdegree)
+                    for _ in range(num_layer)]
         self.encoder_layers = nn.ModuleList(encoders)
 
-
-
     def forward(self, KG_embed_vector, in_degree, out_degree):
-
         node_features = self.node_encoder(KG_embed_vector)
         node_features = (
-            node_features+self.in_degree_encoder(in_degree)+self.out_degree_encoder(out_degree)
+                node_features + self.in_degree_encoder(in_degree) + self.out_degree_encoder(out_degree)
         )
         output = self.Dropout(node_features)
         for enc_layer in self.encoder_layers:
@@ -168,37 +162,27 @@ class GraphNodeFeatures(nn.Module):
         return output
 
 
-
-
-
-
-
-
 class LayerNorm(nn.Module):
     def __init__(self, hidden_size, eps=1e-12):
-            """Construct a layernorm module in the TF style (epsilon inside the square root).
+        """Construct a layernorm module in the TF style (epsilon inside the square root).
             """
-            super(LayerNorm, self).__init__()
-            self.weight = nn.Parameter(torch.ones(hidden_size))
-            self.bias = nn.Parameter(torch.zeros(hidden_size))
-            self.variance_epsilon = eps
+        super(LayerNorm, self).__init__()
+        self.weight = nn.Parameter(torch.ones(hidden_size))
+        self.bias = nn.Parameter(torch.zeros(hidden_size))
+        self.variance_epsilon = eps
 
     def forward(self, x):
-            u = x.mean(-1, keepdim=True)
-            s = (x - u).pow(2).mean(-1, keepdim=True)
-            x = (x - u) / torch.sqrt(s + self.variance_epsilon)
-            return self.weight * x + self.bias
+        u = x.mean(-1, keepdim=True)
+        s = (x - u).pow(2).mean(-1, keepdim=True)
+        x = (x - u) / torch.sqrt(s + self.variance_epsilon)
+        return self.weight * x + self.bias
 
-
-
-
-
-#x = torch.randn(1,128,128)
-#in_degree = torch.randint(0,5,(1,128))
-#out_degree = torch.randint(0,5,(1,128))
-#model = EncoderLayer(embed_dim=128,num_heads=8,hidden_size=256,ffn_size=256,num_indegree=128,num_outdegree=128)
-#hidden_state,attn_score = model(x)
-#mod = GraphTransformerEncoder(dropout_rate=0.1,
+# x = torch.randn(1,128,128)
+# in_degree = torch.randint(0,5,(1,128))
+# out_degree = torch.randint(0,5,(1,128))
+# model = EncoderLayer(embed_dim=128,num_heads=8,hidden_size=256,ffn_size=256,num_indegree=128,num_outdegree=128)
+# hidden_state,attn_score = model(x)
+# mod = GraphTransformerEncoder(dropout_rate=0.1,
 #                 KG_num=128,
 #                 embed_dim=128,
 #                 num_in_degree=128,
@@ -207,7 +191,6 @@ class LayerNorm(nn.Module):
 #                 hidden_size=128,
 #                 ffn_size=128,
 #                 num_layer=3
-#)
-#output = mod(x,in_degree,out_degree)
-#print(output.shape)
-
+# )
+# output = mod(x,in_degree,out_degree)
+# print(output.shape)
