@@ -3,6 +3,8 @@ import torch.nn as nn
 import math
 from torch.nn import MultiheadAttention
 
+
+
 '''
  This part of PriorNetwork aim to learn and model the representation of p(z|x)
 At First ,the representation of KG transfer by Graph TransformerEncoder will be passed to the attention mechanism  to 
@@ -13,39 +15,52 @@ space  and model the distribution based on the input KG transformation
 '''
 
 
-class PriorNetwork(nn.Module):
-    def __init__(self, embed_dim, num_heads, input_dim, output_dim):
-        super(PriorNetwork, self).__init__()
-        self.attentionLayer = AttentionLayer(embed_dim, num_heads)
-        self.Dense = DenseLayer(input_dim, output_dim)
 
-    def forward(self, KG_embed_vector):
-        KG_update_vector, KG_attn = self.attentionLayer(KG_embed_vector)
-        # print(KG_update_vector.shape)
+class PriorNetwork(nn.Module):
+    def __init__(self,embed_dim,num_heads,input_dim,output_dim):
+        super(PriorNetwork,self).__init__()
+        self.attentionLayer = AttentionLayer(embed_dim,num_heads)
+        self.Dense = DenseLayer(input_dim,output_dim)
+
+
+    def forward(self,KG_embed_vector):
+        KG_update_vector ,KG_attn= self.attentionLayer(KG_embed_vector)
+        #print(KG_update_vector.shape)
         KG_update_vector = self.Dense(KG_update_vector)
-        z, attn = self.attentionLayer(KG_update_vector)
+        z,attn_score = self.attentionLayer(KG_update_vector)
 
         return z
 
 
-class AttentionLayer(nn.Module):
-    def __init__(self, embed_dim, num_heads):
-        super(AttentionLayer, self).__init__()
-        self.attention = nn.MultiheadAttention(embed_dim, num_heads)
 
-    def forward(self, hidden_state):
-        attn, context_vector = self.attention(query=hidden_state, key=hidden_state, value=hidden_state)
-        return attn, context_vector
+
+
+
+class AttentionLayer(nn.Module):
+    def __init__(self,embed_dim,num_heads):
+        super( AttentionLayer, self ).__init__()
+        self.attention = nn.MultiheadAttention(embed_dim,num_heads)
+
+    def forward(self,hidden_state):
+        attn,context_vector = self.attention(query=hidden_state,key=hidden_state,value=hidden_state)
+        return attn,context_vector
+
+
+
+
+
 
 
 class DenseLayer(nn.Module):
-    def __init__(self, input_dim, output_dim):
+    def __init__(self,input_dim,output_dim):
         super(DenseLayer, self).__init__()
-        self.fc = nn.Linear(input_dim, output_dim)
+        self.fc = nn.Linear(input_dim,output_dim)
 
-    def forward(self, x):
+    def forward(self,x):
         output = self.fc(x)
         return output
+
+
 
 
 class MultiAttention(nn.Module):
@@ -93,12 +108,14 @@ class MultiAttention(nn.Module):
         assert x == orig_q_size
         return x
 
-# KG_embed_vector = torch.randn(1,128,128)
 
-# embed_dim = 128
-# num_heads = 8
-# input_dim = 128
-# output_dim = 128
-# model = PriorNetwork(embed_dim, num_heads, input_dim, output_dim)
-# z = model(KG_embed_vector)
-# print(z[0].shape)
+
+#KG_embed_vector = torch.randn(1,128,128)
+
+#embed_dim = 128
+#num_heads = 8
+#input_dim = 128
+#output_dim = 128
+#model = PriorNetwork(embed_dim, num_heads, input_dim, output_dim)
+#z = model(KG_embed_vector)
+#print(z[0].shape)

@@ -2,11 +2,10 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 
-
-# CNN
+#CNN
 class CNN(nn.Module):
-    def __init__(self, dim_out):
-        super(CNN, self).__init__()
+    def __init__(self,dim_out):
+        super(CNN,self).__init__()
         self.dim_out = dim_out
         self.features = nn.Sequential(
             nn.Conv2d(1, 8, kernel_size=3, stride=2),  # channel of ZPI is 1
@@ -23,3 +22,4 @@ class CNN(nn.Module):
         feature = self.maxpool(feature)
         feature = feature.view(-1, self.dim_out)  # B, dim_out
         return feature
+

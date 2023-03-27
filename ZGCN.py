@@ -12,8 +12,11 @@ class TLSGCN(nn.Module):
         super(TLSGCN, self).__init__()
         self.link_len = link_len
         self.weights_pool = nn.Parameter(torch.FloatTensor(emb_dim, link_len, dim_in, int(dim_out / 2)))
+        torch.nn.init.xavier_normal_(self.weights_pool)
         self.weights_window = nn.Parameter(torch.FloatTensor(emb_dim, dim_in, int(dim_out / 2)))  # int(dim_in/2)
+        torch.nn.init.xavier_normal_(self.weights_window)
         self.bias_pool = nn.Parameter(torch.FloatTensor(emb_dim, dim_out))
+        torch.nn.init.xavier_normal_(self.bias_pool)
         self.T = nn.Parameter(torch.FloatTensor(window_len))  # window_len
         self.cnn = CNN(int(dim_out / 2))
 
@@ -43,13 +46,13 @@ class TLSGCN(nn.Module):
         bias = torch.matmul(node_embeddings, self.bias_pool)  # N, dim_out
 
         x_g = torch.einsum("knm,bmc->bknc", supports, x)  # B, link_len, N, dim_in
-        print(x_g.shape)
+        #print(x_g.shape)
         x_g = x_g.permute(0, 2, 1, 3)  # B, N, link_len, dim_in
         # print(torch.max(x_g))
-        print(x_g.shape)
+        #print(x_g.shape)
 
         # print(torch.max(weights))
-        print(weights.shape)
+        #print(weights.shape)
 
         x_gconv = torch.einsum('bnki,nkio->bno', x_g, weights)  # B, N, dim_out/2(4,62,2,62),(62,2,10,31)
         # print(x_gconv)
