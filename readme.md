@@ -17,3 +17,11 @@ zigzagtools -- ZPI计算工具
 BrainGraphZPI -- 计算绘制ZPI图
 
 Add_Windows -- 加窗
+
+#
+
+Loss Visualize -- tensorboard --logdir='.\path\to\log' --host=127.0.0.1 --port=8008
+
+Train  -- train BGI.py # BGI模块
+
+Fusion -- train  Fusion.PY # 整个模块

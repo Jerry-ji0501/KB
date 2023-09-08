@@ -14,33 +14,32 @@ import torch.nn as nn
 
 '''
 
+# Decoder
 class GraphTransformerDecoder(nn.Module):
-    def __init__(self,hidden_size,dropout_rate,num_in_degree,embed_dim,num_out_degree,num_decoder_layers,num_heads,ffn_size):
-        super(GraphTransformerDecoder,self).__init__()
+    def __init__(self, hidden_size, dropout_rate, num_in_degree, embed_dim, num_out_degree, num_decoder_layers,
+                 num_heads, ffn_size):
+        super(GraphTransformerDecoder, self).__init__()
 
-        self.LayerNorm = nn.LayerNorm(hidden_size,eps=1e-12)
+        self.LayerNorm = nn.LayerNorm(hidden_size, eps=1e-12)
         self.softmax = nn.Softmax(dim=-1)
         self.Dropout = nn.Dropout(dropout_rate)
         self.in_degree_encoder = nn.Embedding(num_in_degree, embed_dim, padding_idx=0)
         self.out_degree_encoder = nn.Embedding(num_out_degree, embed_dim, padding_idx=0)
 
-        decoders = [DecoderLayer(embed_dim,num_heads,ffn_size)
-                   for _ in range (num_decoder_layers)]
-        self.decoder_layers =nn.ModuleList(decoders)
-        self.layers_fn = nn.Linear(64, 62)
+        decoders = [DecoderLayer(embed_dim, num_heads, ffn_size)
+                    for _ in range(num_decoder_layers)]
+        self.decoder_layers = nn.ModuleList(decoders)
+        self.layers_fn = nn.Linear(128, 62)
 
-
-    def forward(self,BG_hidden_state):
-
+    def forward(self, BG_hidden_state):
         BG_hidden_state = self.Dropout(BG_hidden_state)
         for dec_layer in self.decoder_layers:
             output = dec_layer(BG_hidden_state)
         BG_Construct = output
         BG_Construct = self.layers_fn(BG_Construct)
         ##print(BG_Construct.shape)
-        #BG_Construct = nn.Softmax(output)
+        # BG_Construct = nn.Softmax(output)
         return BG_Construct
-
 
 class DecoderLayer(nn.Module):
     def __init__(self, embed_dim,num_heads,ffn_size):

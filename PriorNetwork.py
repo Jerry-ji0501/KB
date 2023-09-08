@@ -16,20 +16,20 @@ space  and model the distribution based on the input KG transformation
 
 
 
+
+# PriorNetwork
 class PriorNetwork(nn.Module):
-    def __init__(self,embed_dim,num_heads,input_dim,output_dim):
-        super(PriorNetwork,self).__init__()
-        self.attentionLayer = AttentionLayer(embed_dim,num_heads)
-        self.Dense = DenseLayer(input_dim,output_dim)
+    def __init__(self, embed_dim, num_heads, input_dim, output_dim):
+        super(PriorNetwork, self).__init__()
+        self.attentionLayer = AttentionLayer(embed_dim, num_heads)
+        self.Dense = DenseLayer(input_dim, output_dim)
+        self.Dense1 = DenseLayer(210, 210)
 
+    def forward(self, KG_embed_vector):
+        KG_update_vector, KG_attn = self.attentionLayer(KG_embed_vector)
+        z = self.Dense(KG_update_vector)
+        return z,KG_attn
 
-    def forward(self,KG_embed_vector):
-        KG_update_vector ,KG_attn= self.attentionLayer(KG_embed_vector)
-        #print(KG_update_vector.shape)
-        KG_update_vector = self.Dense(KG_update_vector)
-        z,attn_score = self.attentionLayer(KG_update_vector)
-
-        return z
 
 
 

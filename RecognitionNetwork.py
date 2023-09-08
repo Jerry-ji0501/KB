@@ -6,15 +6,14 @@ import math
 
 
 '''
-    今晚的任务就是把GNN里的部分改一下
-    然后写一下SYN模块 看看能不能训练出Loss
-    检查一下是否存在逻辑上明显的错误
+    
     
 
 
 '''
 
 
+# Recognition Network
 class RecognitionNetwork(nn.Module):
     '''
     num_layers:  The number of GNN Layers
@@ -31,25 +30,26 @@ class RecognitionNetwork(nn.Module):
 
 
     '''
-    def __init__(self,num_layers,embed_dim,hidden_size,num_heads,attention_prob_dropout_prob,dropout_rate):
+
+    def __init__(self, num_layers, embed_dim, hidden_size, num_heads, attention_prob_dropout_prob, dropout_rate):
         super(RecognitionNetwork, self).__init__()
 
-        self.gnn = GNN(num_layers,embed_dim,hidden_size,num_heads,attention_prob_dropout_prob,dropout_rate)
-        self.AttentionLayer = AttentionLayer(embed_dim,num_heads)
-        self.Dense = DenseLayer(input_dim=64,output_dim=64)
-        self.Dense1 = DenseLayer(input_dim=62,output_dim=64)
-
-    def forward(self,BG_embed_vector):
+        self.gnn = GNN(num_layers, embed_dim, hidden_size, num_heads, attention_prob_dropout_prob, dropout_rate)
+        self.gcn = GCN(embed_dim, hidden_size, embed_dim, dropout_rate)
+        self.AttentionLayer = AttentionLayer(embed_dim, num_heads)
+        self.Dense = DenseLayer(input_dim=embed_dim, output_dim=embed_dim)
+        self.Dense1 = DenseLayer(input_dim=128, output_dim=embed_dim)
+    def forward(self, BG_embed_vector,BG_adj):
         BG_embed_vector = self.Dense1(BG_embed_vector)
+        BG_embed_vector = self.gcn(BG_adj, BG_embed_vector)
         print(BG_embed_vector.shape)
-        hidden_state  = self.gnn(BG_embed_vector)
-        hidde_state,attn = self.AttentionLayer(hidden_state)
-        #print(attn.shape)
-        #print(hidde_state.shape)
+        hidden_state = self.gnn(BG_embed_vector)
+        hidde_state, attn = self.AttentionLayer(hidden_state)
+        # print(attn.shape)
+        # print(hidde_state.shape)
         z = self.Dense(hidde_state)
 
-        return z
-
+        return z,attn
 
 
 

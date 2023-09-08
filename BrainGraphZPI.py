@@ -11,7 +11,7 @@ import dionysus as d
 import time
 
 
-eeg_dir = 'F:/ResearchData/Demo/data/eeg/1_20131027.mat'
+eeg_dir = 'F:/ResearchData/Demo/data/eeg/'
 # eeg_file_list = os.listdir(eeg_dir)
 # eeg_file_list.sort()
 
@@ -33,22 +33,15 @@ scaleParameter = 1
 maxDimHoles = 2
 Timesnap = 3
 
-# BrainGraph networks Zigzag Persistence Diagrams
-# Load the BrainGraph Adj.
-# BrainGraphs_datasets = pd.read_csv(path+'/distance.csv')
-# BrainGraph_edges = BrainGraphs_datasets.values[:,0:2]
-# BrainGraph_edgelists = [(u,v) for u,v in BrainGraph_edges]
-# Brain_Net = nx.Graph()
-# Brain_Net.add_edge_from(BrainGraph_edgelists)
-paths = os.getcwd()
 
+
+paths = os.getcwd()
 BrainGraphs = []
 print('Loading data')
 # for i in range(0,Timesnap):
 #    edgelist =np.loadtxt(path+'/DYN_NET/File'+str(i)+'.csv',delimiter=',')
 #    BrainGraphs.append(edgelist)
-# paths = r'F:/ResearchData/Demo/adjacent_matrix'
-dir_list = os.listdir(paths + '/adjacent_matrix(2)/pm0.3/1_20131027/djc_eeg1')
+dir_list = os.listdir(paths)
 for cur_file in dir_list:
     path = os.path.join(paths + '/adjacent_matrix(2)/pm0.3/1_20131027/djc_eeg1', cur_file)
     edgelist = np.loadtxt(path, delimiter=',')

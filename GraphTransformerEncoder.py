@@ -40,9 +40,11 @@ KG_embed_vector+in_degree_embedding+out_degree_embedding->Graph_representation_v
 
 
 '''
+
+# Encoder
 class GraphTransformerEncoder(nn.Module):
     def __init__(self,
-                 dropout_rate:float,
+                 dropout_rate: float,
                  KG_num,
                  embed_dim,
                  num_in_degree,
@@ -51,9 +53,8 @@ class GraphTransformerEncoder(nn.Module):
                  hidden_size,
                  ffn_size,
                  num_layer
-                ):
+                 ):
         super(GraphTransformerEncoder, self).__init__()
-
 
         self.dropout = nn.Dropout(dropout_rate)
         self.LayerNorm = nn.LayerNorm(embed_dim)
@@ -66,10 +67,11 @@ class GraphTransformerEncoder(nn.Module):
         self.encoder_layers = nn.ModuleList(encoders)
 
     def forward(self, KG_embed_vector, in_degree, out_degree):
-        #node_features = self.node_encoder(KG_embed_vector)
+        # node_features = self.node_encoder(KG_embed_vector)
+
         node_features = (
                 KG_embed_vector + self.in_degree_encoder(in_degree) + self.out_degree_encoder(out_degree)
-        )
+        ).to('cuda')
         output = self.dropout(node_features)
         for enc_layer in self.encoder_layers:
             output = enc_layer(output)
@@ -77,6 +79,7 @@ class GraphTransformerEncoder(nn.Module):
         output = self.LayerNorm(output)
 
         return output
+
 
 
 class EncoderLayer(nn.Module):
@@ -193,21 +196,5 @@ class LayerNorm(nn.Module):
 
 
 
-#x = torch.randn(1,128,128)
-#in_degree = torch.randint(0,5,(1,128))
-#out_degree = torch.randint(0,5,(1,128))
-#model = EncoderLayer(embed_dim=128,num_heads=8,hidden_size=256,ffn_size=256,num_indegree=128,num_outdegree=128)
-#hidden_state,attn_score = model(x)
-#mod = GraphTransformerEncoder(dropout_rate=0.1,
-#                 KG_num=128,
-#                 embed_dim=128,
-#                 num_in_degree=128,
-#                 num_out_degree=128,
-#                 num_heads=8,
-#                 hidden_size=128,
-#                 ffn_size=128,
-#                 num_layer=3
-#)
-#output = mod(x,in_degree,out_degree)
-#print(output.shape)
+
 
